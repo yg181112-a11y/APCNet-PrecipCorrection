@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg)](https://pytorch.org/)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.xxxxxxx.svg)](https://doi.org/10.5281/zenodo.xxxxxxx) This repository contains the official PyTorch implementation of **APCNet (AdvancedPrecipCorrectionNet)**, as presented in our paper submitted to *Artificial Intelligence for the Earth Systems (AIES)*.
+[![DOI](https://zenodo.org/badge/1242451481.svg)](https://doi.org/10.5281/zenodo.20271614) This repository contains the official PyTorch implementation of **APCNet (AdvancedPrecipCorrectionNet)**, as presented in our paper submitted to *Artificial Intelligence for the Earth Systems (AIES)*.
 
 ## 📖 Overview
 
