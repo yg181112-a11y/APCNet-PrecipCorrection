@@ -17,11 +17,9 @@ Numerical weather prediction (NWP) models, such as the Global Forecast System (G
 ## 🗂️ Repository Structure
 
 ```text
-.
-├── data/
-│   └── sample/                 # A small sample dataset (1-day GFS & ERA5) for quick testing
-│       ├── GFS/
-│       └── ERA5/
+.              
+├── GFS(sample)                 # A small sample dataset for quick testing
+├── ERA5(sample)                # A small sample dataset for quick testing
 ├── train_apcnet.py             # Main training and evaluation script (APCNet & U-Net Baseline)
 ├── requirements.txt            # Python dependencies
 └── README.md                   # Project documentation
