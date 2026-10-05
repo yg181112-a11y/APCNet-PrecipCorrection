@@ -1,0 +1,86 @@
+# -*- coding: utf-8 -*-
+"""重绘 Fig.7 排名图（run13 权威数字，含 U-Net），并替换 docx 中旧图。"""
+import sys, os
+sys.path.insert(0, r'C:\Users\yg181\AppData\Roaming\Python\Python313\site-packages')
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+plt.rcParams.update({
+    'font.family': 'serif',
+    'font.serif': ['Times New Roman'],
+    'mathtext.fontset': 'stix',
+})
+import numpy as np
+
+FIG = r'C:\Users\yg181\Desktop\论文三\WAF\r3_media'
+os.makedirs(FIG, exist_ok=True)
+
+# Okabe-Ito 色
+C_BIN = '#009E73'; C_OLS = '#0072B2'; C_QM = '#E69F00'; C_APC = '#D55E00'; C_UNET = '#CC79A7'
+C_GFS = '#000000'
+
+# ===== run13 权威数字 =====
+era5 = {'BinCM': 27.3, 'OLS': 22.2, 'QM': 11.1, 'APCNet': -14.5, 'U-Net': -55.1}
+chm6 = {'BinCM': 12.5, 'OLS': 12.15, 'QM': 3.58, 'APCNet': -20.82, 'U-Net': -36.84}
+gpm6 = {'BinCM': 22.6, 'OLS': 19.6, 'QM': 8.3, 'APCNet': -16.5, 'U-Net': -47.3}
+
+fig, ax = plt.subplots(figsize=(6.8, 3.5))
+methods = ['BinCM', 'OLS', 'QM', 'APCNet', 'U-Net']
+refs = ['ERA5 (training ref)', 'CHM (obs, daily)', 'GPM IMERG (obs, 3h)']
+# 柱按参照着色（图例与柱严格对应）；方法由 x 位置区分
+# 换配色：ERA5=蓝, CHM=绿, GPM=橙（Okabe-Ito 高区分度）
+ref_colors = ['#0072B2', '#009E73', '#E69F00']
+x6 = np.arange(len(methods)); w = 0.26
+for i, ref in enumerate(refs):
+    src = era5 if i == 0 else (chm6 if i == 1 else gpm6)
+    labeled = False
+    for j, m in enumerate(methods):
+        v = src[m]
+        if v is None:
+            continue
+        ax.bar(x6[j] + (i - 1) * w, v, w, color=ref_colors[i], edgecolor='k', linewidth=0.4,
+               label=ref if not labeled else None)
+        labeled = True
+        dy = 3.5 if v >= 0 else -8.0
+        ax.text(x6[j] + (i - 1) * w, v + dy, '%.1f' % v, ha='center', fontsize=7)
+ax.axhline(0, color='k', lw=0.8, ls='--')
+ax.set_xticks(x6); ax.set_xticklabels(methods, fontsize=9)
+ax.set_ylabel('MSE/RMSE improvement vs GFS (%)', fontsize=9)
+ax.set_ylim(-62, 33)
+ax.set_title('Consistent ranking: BinCM > OLS > QM > GFS > APCNet (3-h scales)', fontsize=9.5)
+ax.legend(frameon=False, loc='upper right', fontsize=6.8, ncol=1)
+for s in ('top', 'right'):
+    ax.spines[s].set_visible(False)
+plt.tight_layout()
+out = os.path.join(FIG, 'fig7_ranking_run13.png')
+plt.savefig(out, dpi=300, bbox_inches='tight')
+print('saved', out)
+
+# ===== 替换 docx 中的旧图（P87 段落） =====
+import docx
+from docx.oxml.ns import qn
+PATH = r'C:\Users\yg181\Desktop\论文三\Manuscript_R3_WAF_draft.docx'
+d = docx.Document(PATH)
+# 找到嵌入的 ranking 图（P87：图注 Fig.7 前一段含图且尺寸约 1727x956）
+target_idx = None
+for i, p in enumerate(d.paragraphs):
+    blips = p._p.findall('.//' + qn('a:blip'))
+    if not blips:
+        continue
+    # 检查下一段的 caption
+    nxt = d.paragraphs[i+1].text if i+1 < len(d.paragraphs) else ''
+    if 'Fig. 7' in nxt:
+        target_idx = i
+        break
+print('target para idx:', target_idx)
+if target_idx is not None:
+    p = d.paragraphs[target_idx]
+    blip = p._p.find('.//' + qn('a:blip'))
+    old_rid = blip.get(qn('r:embed'))
+    # 新图加入
+    new_rid, _ = d.part.get_or_add_image(out)
+    blip.set(qn('r:embed'), new_rid)
+    d.save(PATH)
+    print('replaced rId %s -> %s' % (old_rid, new_rid))
+else:
+    print('ERROR: Fig.7 paragraph not found')

@@ -1,88 +1,94 @@
-# APCNet: Physics-Constrained Deep Learning for Extreme Precipitation Correction
+# APCNet Precipitation Correction — Reanalysis-Trained DL Post-Processing over Northeast China
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg)](https://pytorch.org/)
-[![DOI](https://zenodo.org/badge/1242451481.svg)](https://doi.org/10.5281/zenodo.20271614) This repository contains the official PyTorch implementation of **APCNet (AdvancedPrecipCorrectionNet)**, as presented in our paper submitted to *Artificial Intelligence for the Earth Systems (AIES)*.
+**Code & data pipeline for the manuscript:**
 
-## 📖 Overview
+> *Skill limits and transferability of deep-learning precipitation post-processing trained on reanalysis targets: consistent failure across ERA5, CHM, and GPM verification over Northeast China*
+> (Revision 3, submitted to *Weather and Forecasting*, AMS)
 
-Numerical weather prediction (NWP) models, such as the Global Forecast System (GFS), often suffer from systematic biases and spatial displacement errors over complex terrain, particularly when predicting extreme precipitation driven by the Northeast China Cold Vortex. Traditional pure data-driven deep learning post-processing frequently encounters the "over-smoothing" trap and feature collapse.
+---
 
-**APCNet** resolves these issues by introducing a **Kinematic-Thermodynamic Decoupled Architecture**. 
-* **Kinematic Backbone:** Preserves spatial topology using large-scale wind and precipitation fields.
-* **Thermodynamic Gating (SE-Hardsigmoid):** Adaptively filters out high-frequency parameterized noise (e.g., CAPE) while dynamically amplifying high-confidence macro-scale priors (e.g., PWAT).
-* **Optimization:** Integrates a Smooth Asymmetric Loss with the spatial Fractions Skill Score (FSS) to mitigate the double-penalty effect.
+## Overview
 
-## 🗂️ Repository Structure
+This repository contains the full experimental pipeline for a **counter-example / skill-limit study** of deep-learning (DL) precipitation post-processing trained on reanalysis targets. Using 11 years (2015–2025) of operational GFS f003 forecasts over the Liaohe basin (Northeast China), we show that:
 
-```text
-.              
-├── GFS(sample)                 # A small sample dataset for quick testing
-├── ERA5(sample)                # A small sample dataset for quick testing
-├── train_apcnet.py             # Main training and evaluation script (APCNet & U-Net Baseline)
-├── requirements.txt            # Python dependencies
-└── README.md                   # Project documentation
+- After correcting a **target-data error** (ERA5 hourly `tp` was paired with GFS 3-h accumulations as if they shared the same accumulation window), a correction network that learns a near-perfect, noise-free mapping **degrades** forecasts whenever the reanalysis target is noisy;
+- On two independent verification products (CHM gauge-merged daily rates; GPM IMERG satellite 3-h accumulations), the DL networks (APCNet and a standard U-Net) are the **only methods that make forecasts worse on every reference**, while simple quantile mapping (QM) and grid-point linear regression (OLS) **improve** them on every reference;
+- The ranking between DL and simple baselines is **scale-dependent**: at 24–120 h accumulations the same networks gain observationally confirmed skill while the simple baselines collapse.
+
+The manuscript re-frames the original "better network" story as an evidence-based boundary study: **reanalysis-trained DL post-processing inherits the smoothness and noise of its training reference; its operational value is scale-dependent and, at fine 3-h scales, negative.**
+
+---
+
+## Repository layout
 
 ```
-
-## ⚙️ Installation & Environment Setup
-
-We recommend using [Anaconda](https://www.anaconda.com/) to manage your environment.
-
-```bash
-# 1. Create a new conda environment
-conda create -n apcnet_env python=3.9 -y
-conda activate apcnet_env
-
-# 2. Install PyTorch (Please select the version matching your CUDA Toolkit)
-pip install torch torchvision torchaudio --index-url [https://download.pytorch.org/whl/cu118](https://download.pytorch.org/whl/cu118)
-
-# 3. Install other required dependencies
-pip install -r requirements.txt
-
+01_data_reconstruction/   ERA5 hourly re-download, true 3-h reconstruction, six-gate acceptance
+02_training_inference/    APCNet / U-Net training & inference (all targets, all leads)
+03_baselines/             QM, OLS, bin-conditional (BinCM), probabilistic baselines
+04_evaluation/            Block bootstrap, probabilistic, diurnal, terrain-stratified, event-level diagnostics
+05_figures/               Publication-quality figure scripts (Times New Roman, 300 dpi)
+06_control_experiments/   Controlled experiments isolating loss / pooling / gating effects
 ```
 
-## 🚀 Quick Start (Testing with Sample Data)
+### 01 — Data reconstruction (the key fix)
 
-To facilitate reproducibility and allow reviewers to quickly verify our architecture, we provide a minimal sample dataset.
+- `download_era5_tp_hourly.py` / `era5_download_yearly.py` — CDS download of ERA5 **hourly** `tp` (24 steps/day) for 2015–2025.
+- `aggregate_era5_tp.py` — reconstructs true 3-h accumulations as `TP_3h(t) = tp(t−2h) + tp(t−1h) + tp(t)` for t ∈ {03, 09, 15, 21}Z, replacing the old monthly (3-hourly-subsampled) files.
+- `verify_era5_target.py` — six-gate acceptance (metadata; grid; GFS/ERA5 domain-mean ratio 0.9–1.1; annual precipitation 600–900 mm; ≥20 mm grid-point parity; time-series correlation r > 0.8). **Training is only permitted after all six gates pass.**
 
-You can execute the training pipeline directly using the sample data. The script will automatically perform data matching, training, and evaluation.
+### 02 — Training & inference
 
-```bash
-python train_apcnet.py \
-    --gfs_dir ./data/sample/GFS \
-    --era5_dir ./data/sample/ERA5 \
-    --save_dir ./output
+- `13.0_main.py` — main APCNet/U-Net training & evaluation script (seeds 42/40/41; input: 8 channels + 6 prior times at 6-h intervals; residual learning; asymmetric intensity-weighted loss and symmetric variant).
+- Multi-lead training (`train_24h.py`, `train_24h_seed.py`, `train_unet_lead.py`, …) and GPM-target training (`gpm_train_dataset.py`, `train_gpm3h_apcnet.py`, `train_gpm_unet.py`, `eval_gpm_trained.py`).
 
-```
-*(Note: If you are using the provided hardcoded script, please ensure you update the `GFS_DIR` and `ERA5_DIR` variables inside `train_apcnet.py` to point to the correct relative paths).*
+### 03 — Baselines
 
-### Running the Baseline (Standard U-Net)
+- `qm_baseline.py` — quantile mapping (climatological CDF, training-period calibration, test-period blind application).
+- `quick_ols_baseline.py` / `build_gpm3h_ols.py` — grid-point linear regression (OLS).
+- `bin_conditional_baseline.py` / `bincm_split_sens.py` — bin-conditional mean correction.
+- `prob_*.py` / `probabilistic_apcnet*.py` — probabilistic (ZIG) variants with CRPS/Brier/reliability diagnostics.
 
-To reproduce the pure data-driven baseline (Standard U-Net) discussed in the ablation study of our paper, simply toggle the baseline flag in the script:
+### 04 — Evaluation
 
-1. Open `train_apcnet.py`.
-2. Locate the line `RUN_BASELINE_UNET = False`.
-3. Change it to `RUN_BASELINE_UNET = True` and run the script again.
+- Block-bootstrap significance: `run13_bootstrap.py`, `era5_ref_bootstrap.py`, `ets_bootstrap_era5.py`, `ets_bootstrap_gpm.py`, `chm_bootstrap.py`, `chm_bootstrap_blocklen.py`, `gpm3h_bootstrap.py`, `lead_bootstrap.py`.
+- Independent verification: `verify_gpm_independent.py`, `verify_gpm_lead*.py`, `chm_*eval*.py`, `eval_gpm3h_authoritative.py`.
+- Event-level / object-based / synoptic diagnostics: `event_verify_gpm3h.py`, `object_based_verification.py`, `storm_synoptic*.py`, `extreme_events.py`.
+- Diurnal (`season_3h_24h.py`, `chm_seasonal_run13.py`), terrain-stratified (`terra_phys_eval.py`), probabilistic (`gpm_prob_eval.py`), scale attribution (`scale_attribution.py`).
 
-## 📊 Feature Attribution Analysis
+### 05 — Figures
 
-Our code includes a perturbation-based attribution module (`analyze_feature_importance`). During the evaluation phase, the script will automatically output the relative contribution of each physical variable to the terminal, demonstrating APCNet's intelligent noise-immunization capability.
+`make_figs_pub.py` orchestrates all journal figures (Times New Roman, panel labels, 300 dpi PNG + PDF).
 
-## 📝 Citation
+### 06 — Controlled experiments
 
-If you find this code or our framework useful in your research, please consider citing our paper:
+`controlled_experiment.py` / `controlled_exp_grid.py` isolates the effect of each architectural/loss component (kinematics pooling, gating, hard-threshold loss) with matched seeds.
 
-```bibtex
-@article{tian2026apcnet,
-  title={Physics-Constrained and Neighborhood-Aware Deep Learning for Extreme Precipitation Correction over Complex Terrain},
-  author={Tian, Lin and Cui, Feifan and Huang, Xin and Jiang, Yuhan and Yu, Jintao and Wang, Yaoxi and Ni, Jiacheng},
-  journal={Artificial Intelligence for the Earth Systems (Under Review)},
-  year={2026}
-}
+---
 
-```
-## 📜 License
+## Data sources
 
-This project is licensed under the MIT License - see the [LICENSE](https://www.google.com/search?q=LICENSE) file for details.
+| Data | Source | Period | Role |
+|---|---|---|---|
+| GFS f003 (0.25°) | NOAA NCEI / NOMADS (`gfs.0p25.*`) | 2015–2025 | Input |
+| ERA5 hourly `tp` | ECMWF CDS | 2015–2025 | Training target (reconstructed 3-h) |
+| CHM daily (0.1°) | CMA multisource merging (Shen et al. 2014) | 2024–2025 | Independent verification |
+| GPM IMERG Final (0.1°, 30-min) | NASA GES DISC | 2024-01-15 – 2025-09-30 | Independent verification |
+
+Raw data are too large to host here; scripts in `01_data_reconstruction` reproduce the exact download and processing. Key processed artifacts and evaluation results are archived on Zenodo (see manuscript Data Availability).
+
+---
+
+## Reproducibility notes
+
+- Data are split **strictly by year**: train 2015–2021, validation 2022–2023, test 2024–2025.
+- Normalization statistics are estimated on the training period only; validation/test are never oversampled.
+- GFS precipitation input is clipped to [0,100] mm, capped at the 99.9th percentile, and lightly smoothed (σ=0.6) when the field maximum < 10 mm. **The ERA5 target is not cleaned.**
+- All significance tests use monthly **block bootstrap** (autocorrelation-aware); the 3-h test series are not treated as i.i.d.
+
+---
+
+## License
+
+Code: MIT. Data: see original provider terms (ECMWF CDS, NOAA, CMA, NASA GES DISC).
+
+Zenodo archive: see manuscript Data Availability statement.
