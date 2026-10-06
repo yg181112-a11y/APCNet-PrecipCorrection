@@ -48,13 +48,35 @@ fig, axes = plt.subplots(2, 2, figsize=(12.5, 9.8),
                          gridspec_kw={'left': 0.07, 'right': 0.97, 'top': 0.93,
                                       'bottom': 0.12, 'hspace': 0.50, 'wspace': 0.14})
 norm = TwoSlopeNorm(vmin=-vmax, vcenter=0.0, vmax=vmax)
+
+
+def bilinear_up(f, fy, fx):
+    """纯 numpy 双线性上采样（fx/fy 为整数倍），用于消除空间色块颗粒感。"""
+    ny, nx = f.shape
+    yy = np.linspace(0, ny - 1, ny * fy)
+    xx = np.linspace(0, nx - 1, nx * fx)
+    g = np.empty((ny, nx * fx))
+    for i in range(ny):
+        g[i] = np.interp(xx, np.arange(nx), f[i])
+    h = np.empty((ny * fy, nx * fx))
+    for j in range(nx * fx):
+        h[:, j] = np.interp(yy, np.arange(ny), g[:, j])
+    return h
+
+
+UP = 4  # 空间场 4x 上采样，消除颗粒感（不改变数值口径）
 pans = [(axes[0, 0], bg, r'GFS $-$ ERA5', 'Longitude (°E)', '(a)'),
         (axes[0, 1], ba, r'APCNet $-$ ERA5', 'Longitude (°E)', '(b)'),
         (axes[1, 0], bd, r'APCNet $-$ GFS (net modification)', 'Longitude (°E)', '(c)')]
 im = None
+LATS_U = np.linspace(46.0, 40.0, 25 * UP)
+LONS_U = np.linspace(117.0, 126.0, 37 * UP)
 for ax, d, t, xl, lab in pans:
-    d2 = np.where(mask, d, np.nan)
-    im = ax.pcolormesh(GLOBAL_LONS, GLOBAL_LATS, d2, cmap='RdBu_r', norm=norm, shading='auto')
+    d_fill = np.where(mask, d, 0.0)
+    d_u = bilinear_up(d_fill, UP, UP)
+    m_u = bilinear_up(mask.astype(float), UP, UP) > 0.5
+    d2 = np.where(m_u, d_u, np.nan)
+    im = ax.pcolormesh(LONS_U, LATS_U, d2, cmap='RdBu_r', norm=norm, shading='auto')
     ax.set_title(t, fontsize=12)
     ax.set_xlabel(xl, fontsize=10)
     ax.set_ylabel('Latitude (°N)', fontsize=10)

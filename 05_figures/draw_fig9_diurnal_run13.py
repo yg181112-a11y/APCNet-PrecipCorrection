@@ -57,7 +57,8 @@ ax.set_ylabel('Domain-mean precipitation rate (mm/3h)', fontsize=11)
 ax.set_title('Diurnal cycle over the GPM-verification samples (2024-2025)', fontsize=12)
 ax.legend(frameon=False, fontsize=9, loc='upper left')
 ax.set_ylim(0, 0.72)
-ax.text(2.30, 0.665, 'DL networks overestimate by ~2x vs GPM', fontsize=8.5, color='0.35', ha='left')
+ax.text(2.0, 0.15, 'DL networks overestimate by ~2x vs GPM', fontsize=8.5, color='0.35', ha='center',
+        bbox=dict(fc='white', ec='none', alpha=0.85))
 ax.grid(alpha=0.25)
 fig.tight_layout()
 out = r'D:\liaohe\论文三\04_定稿投稿代_2026_R3投稿包与归档\投稿系统上传\figures_300dpi\Fig11.png'

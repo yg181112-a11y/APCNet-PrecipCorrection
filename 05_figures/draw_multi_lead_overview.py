@@ -87,7 +87,7 @@ ax.set_xlabel('Accumulation scale')
 ax.set_ylabel('MSE improvement vs GFS (%)')
 ax.set_title('Reanalysis (ERA5) reference')
 ax.text(0.5, -0.28, '(a)', transform=ax.transAxes, fontsize=12, fontweight='bold', va='top', ha='center')
-ax.legend(frameon=False, loc='upper left', ncol=1)
+ax.legend(frameon=True, loc='upper right', ncol=1, facecolor='white', framealpha=0.85)
 ax.set_ylim(-70, 62)
 ax.annotate('positive = improvement', xy=(0.02, 0.30), xycoords='axes fraction', fontsize=7, color='0.35')
 
@@ -95,15 +95,17 @@ ax.annotate('positive = improvement', xy=(0.02, 0.30), xycoords='axes fraction',
 ax = axes[1]
 ax.axhline(0, color='0.55', lw=0.8, zorder=1)
 x2 = np.arange(3)
-# CHM 实线，GPM 虚线；error bars = 月块 bootstrap 95% CI
+# Panel B：CHM 用方法原色实线；GPM 换浅蓝/浅黄虚线（色相区分参考，不与其他方法色冲突）
+C_GPM_APC = '#56B4E9'   # 浅蓝（Okabe-Ito，全稿未用）
+C_GPM_UNET = '#F0E442'  # 黄（Okabe-Ito，全稿未用）
 ax.plot(x2, chm_apc, 'o-', color=C_APC, lw=1.6, ms=4.5, label='APCNet (CHM)', zorder=3)
 ax.plot(x2, chm_unet, 's-', color=C_UNET, lw=1.6, ms=4.5, label='U-Net (CHM)', zorder=3)
-ax.plot(x2, gpm_apc, 'o--', color=C_APC, lw=1.6, ms=4.5, label='APCNet (GPM)', zorder=3)
-ax.plot(x2, gpm_unet, 's--', color=C_UNET, lw=1.6, ms=4.5, label='U-Net (GPM)', zorder=3)
+ax.plot(x2, gpm_apc, 'o--', color=C_GPM_APC, lw=1.6, ms=4.5, label='APCNet (GPM)', zorder=3)
+ax.plot(x2, gpm_unet, 's--', color=C_GPM_UNET, lw=1.6, ms=4.5, label='U-Net (GPM)', zorder=3)
 ax.errorbar(x2, chm_apc, yerr=chm_apc_err, fmt='none', ecolor=C_APC, elinewidth=1.0, capsize=2.5, zorder=2)
 ax.errorbar(x2, chm_unet, yerr=chm_unet_err, fmt='none', ecolor=C_UNET, elinewidth=1.0, capsize=2.5, zorder=2)
-ax.errorbar(x2, gpm_apc, yerr=gpm_apc_err, fmt='none', ecolor=C_APC, elinewidth=1.0, capsize=2.5, zorder=2)
-ax.errorbar(x2, gpm_unet, yerr=gpm_unet_err, fmt='none', ecolor=C_UNET, elinewidth=1.0, capsize=2.5, zorder=2)
+ax.errorbar(x2, gpm_apc, yerr=gpm_apc_err, fmt='none', ecolor=C_GPM_APC, elinewidth=1.0, capsize=2.5, zorder=2)
+ax.errorbar(x2, gpm_unet, yerr=gpm_unet_err, fmt='none', ecolor=C_GPM_UNET, elinewidth=1.0, capsize=2.5, zorder=2)
 ax.set_xticks(x2); ax.set_xticklabels(['24h', '72h', '120h'])
 ax.set_xlabel('Accumulation scale')
 ax.set_ylabel('Skill improvement vs GFS (%)')

@@ -84,30 +84,31 @@ box(11.90, 6.55, 0.95, 0.5, 'Upsample\n2\u00d72', C_KIN, 13)                    
 box(13.25, 6.1, 1.95, 1.15, 'Dec-1\nConcat(up+e1)\n=240\nConv 240\u219296\nConv 96\u219296', C_KIN, 12)  # right 15.20
 box(13.25, 4.75, 1.95, 0.95, 'Spatial\nAttention\nConv 96\u21921\n(7\u00d77)+Sigmoid', C_KIN, 12)       # right 15.20
 
-arrow(2.0, 4.65, 2.35, 6.8, style='ortho')      # Input -> TA (tip at TA left edge)
-arrow(3.90, 6.8, 4.25, 6.8)                     # TA -> Enc-1
-arrow(5.95, 6.8, 6.30, 6.8)                     # Enc-1 -> MaxPool
-arrow(7.25, 6.8, 7.65, 6.8)                     # MaxPool -> Enc-2
-arrow(9.45, 6.8, 9.90, 6.8)                     # Enc-2 -> Bottleneck
-arrow(11.55, 6.8, 11.90, 6.8)                   # Bottleneck -> Upsample
-arrow(12.85, 6.8, 13.25, 6.75)                  # Upsample -> Dec-1
-arrow(14.22, 6.1, 14.22, 5.70)                  # Dec-1 -> SA (tip at SA top edge)
+arrow(2.0, 4.65, 2.35, 6.825, style='ortho')     # Input -> TA (tip at TA left-edge midpoint)
+arrow(3.90, 6.825, 4.25, 6.825)                  # TA -> Enc-1
+arrow(5.95, 6.825, 6.30, 6.8)                    # Enc-1 -> MaxPool
+arrow(7.25, 6.8, 7.65, 6.825)                    # MaxPool -> Enc-2
+arrow(9.45, 6.825, 9.90, 6.825)                  # Enc-2 -> Bottleneck
+arrow(11.55, 6.825, 11.90, 6.8)                  # Bottleneck -> Upsample
+arrow(12.85, 6.8, 13.25, 6.675)                  # Upsample -> Dec-1
+arrow(14.22, 6.1, 14.22, 5.70)                   # Dec-1 -> SA (tip at SA top-edge midpoint)
 
-# skip connection (e1 -> Dec-1): 曲线箭头从 Enc-1 底部绕到 Dec-1 底部左缘，
-# 弧深控制在 heads 顶(3.7)之上，避免压线/进入任何框（v4 F12: e1 路径此前终止于 Storm 框顶）
-a = FancyArrowPatch((5.95, 6.3), (13.45, 6.1), arrowstyle='-|>', color=C_SKIP, lw=1.4,
-                    connectionstyle='arc3,rad=-0.55', mutation_scale=18)
-ax.add_patch(a)
-ax.text(9.7, 5.02, 'e1 skip (48ch) \u2192 Dec-1 concat', fontsize=13, color=C_SKIP, style='italic')
+# skip connection (e1 -> Dec-1 concat): 正交折线（垂直-水平-垂直），
+# 从 Enc-1 底边中点出发，向下、右行（SA 框上方 y=5.9 间隙）、向上，进入 Dec-1 底边
+ax.plot([5.95, 5.95], [6.3, 5.9], color=C_SKIP, lw=1.5, solid_capstyle='round')
+ax.plot([5.95, 13.45], [5.9, 5.9], color=C_SKIP, lw=1.5, solid_capstyle='round')
+ax.plot([13.45, 13.45], [5.9, 6.1], color=C_SKIP, lw=1.5, solid_capstyle='round')
+ax.add_patch(FancyArrowPatch((13.45, 5.9), (13.45, 6.1), arrowstyle='-|>', color=C_SKIP, lw=1.5, mutation_scale=18))
+ax.text(9.15, 5.42, 'e1 skip (48ch) \u2192 Dec-1 concat', fontsize=13, color=C_SKIP, style='italic')
 
 # ============ Thermodynamic branch (lower) ============
 box(2.35, 2.1, 1.55, 1.0, 'Last step\n7ch thermo\n(CAPE, PWAT,\nU, V, VVEL\u2026)', C_THERM, 12.5)  # right 3.90
 box(4.25, 2.15, 1.95, 1.0, 'FiLM-1\nSE-Attn\nConv 7\u219296\u2192192\n\u03b3, \u03b2 = Conv 7\u2192192', C_THERM, 12)  # right 6.20
 box(6.55, 2.15, 1.95, 1.0, 'FiLM-2\nx\u00b7(1+tanh(\u03b3))\n+\u03b2', C_THERM, 13)  # right 8.50
 
-arrow(2.0, 4.1, 2.35, 2.6, style='ortho')       # Input -> Last step (tip at Last step left edge)
-arrow(3.90, 2.65, 4.25, 2.65)                   # Last step -> FiLM-1
-arrow(6.20, 2.65, 6.55, 2.65)                   # FiLM-1 -> FiLM-2
+arrow(1.15, 4.1, 2.35, 2.6, style='ortho')       # Input bottom-mid -> Last step left-mid
+arrow(3.90, 2.6, 4.25, 2.65)                     # Last step -> FiLM-1
+arrow(6.20, 2.65, 6.55, 2.65)                    # FiLM-1 -> FiLM-2
 
 # FiLM -> Spatial Attention modulation (orthogonal: up, right, up); tips at edges
 ax.plot([8.50, 8.50], [2.65, 4.4], color=C_MOD, lw=1.6, solid_capstyle='round')
@@ -139,7 +140,7 @@ arrow(14.60, 3.0, 13.70, 2.30, style='ortho')   # Storm -> Gated Fusion
 
 # GFS base
 box(9.55, 1.2, 1.55, 0.8, 'GFS base\n(Precip ch)', C_INPUT, 12.5)                       # right 11.10
-arrow(11.10, 1.6, 11.55, 1.6)                   # GFS base -> Gated Fusion
+arrow(11.10, 1.6, 11.55, 1.725)                 # GFS base -> Gated Fusion
 
 # ============ Output ============
 box(11.90, 0.05, 1.85, 0.8, 'Corrected Precip\n(mm/3h, 25\u00d737)', C_OUT, 13, bold=True)  # top 0.85
@@ -161,10 +162,10 @@ ax.legend(handles=legend_elements, loc='upper center', bbox_to_anchor=(0.5, -0.1
           fontsize=13.5, framealpha=0.95, ncol=4, borderaxespad=0.5)
 
 import os
-out_dir = r'D:\liaohe\校正优化过程\第三阶段\12优化\fig_p3_pub'
+out_dir = r'D:\liaohe\论文三\04_定稿投稿代_2026_R3投稿包与归档\投稿系统上传\figures_300dpi'
 os.makedirs(out_dir, exist_ok=True)
-out_png = os.path.join(out_dir, 'fig3_architecture.png')
-out_pdf = os.path.join(out_dir, 'fig3_architecture.pdf')
+out_png = os.path.join(out_dir, 'Fig02.png')
+out_pdf = os.path.join(out_dir, 'Fig02.pdf')
 plt.savefig(out_png, dpi=300, bbox_inches='tight', facecolor='white')
 plt.savefig(out_pdf, bbox_inches='tight', facecolor='white')
 print('saved', out_png)
