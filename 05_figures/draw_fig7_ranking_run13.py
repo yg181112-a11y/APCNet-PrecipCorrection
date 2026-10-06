@@ -20,9 +20,16 @@ C_BIN = '#009E73'; C_OLS = '#0072B2'; C_QM = '#E69F00'; C_APC = '#D55E00'; C_UNE
 C_GFS = '#000000'
 
 # ===== run13 权威数字 =====
-era5 = {'BinCM': 27.3, 'OLS': 22.2, 'QM': 11.1, 'APCNet': -14.5, 'U-Net': -55.1}
+# 口径：ERA5 与 GPM 参照为 MSE improvement（Tables 4 & 8），CHM 为 RMSE improvement（Table 14）。
+# 为统一绘图轴，ERA5/GPM 换算为 RMSE 等价改进：RMSE_imp = 1 - sqrt(1 - MSE_imp/100)。
+def mse2rmse(x):
+    return round(100.0 * (1.0 - (1.0 - x / 100.0) ** 0.5), 2)
+
+era5_mse = {'BinCM': 27.3, 'OLS': 22.2, 'QM': 11.1, 'APCNet': -14.5, 'U-Net': -55.1}
+gpm_mse = {'BinCM': 22.6, 'OLS': 19.6, 'QM': 8.3, 'APCNet': -16.5, 'U-Net': -47.3}
+era5 = {k: mse2rmse(v) for k, v in era5_mse.items()}
+gpm6 = {k: mse2rmse(v) for k, v in gpm_mse.items()}
 chm6 = {'BinCM': 12.5, 'OLS': 12.15, 'QM': 3.58, 'APCNet': -20.82, 'U-Net': -36.84}
-gpm6 = {'BinCM': 22.6, 'OLS': 19.6, 'QM': 8.3, 'APCNet': -16.5, 'U-Net': -47.3}
 
 fig, ax = plt.subplots(figsize=(6.8, 3.5))
 methods = ['BinCM', 'OLS', 'QM', 'APCNet', 'U-Net']
@@ -41,12 +48,12 @@ for i, ref in enumerate(refs):
         ax.bar(x6[j] + (i - 1) * w, v, w, color=ref_colors[i], edgecolor='k', linewidth=0.4,
                label=ref if not labeled else None)
         labeled = True
-        dy = 3.5 if v >= 0 else -8.0
+        dy = 2.2 if v >= 0 else -4.6
         ax.text(x6[j] + (i - 1) * w, v + dy, '%.1f' % v, ha='center', fontsize=7)
 ax.axhline(0, color='k', lw=0.8, ls='--')
 ax.set_xticks(x6); ax.set_xticklabels(methods, fontsize=9)
 ax.set_ylabel('RMSE improvement vs GFS (%)', fontsize=9)
-ax.set_ylim(-70, 33)
+ax.set_ylim(-42, 22)
 ax.set_title('Consistent ranking across three references: BinCM > OLS > QM > APCNet > U-Net (GFS = 0 baseline)', fontsize=9)
 ax.legend(frameon=False, loc='upper right', fontsize=6.8, ncol=1)
 for s in ('top', 'right'):

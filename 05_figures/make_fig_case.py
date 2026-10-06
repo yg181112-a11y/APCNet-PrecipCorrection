@@ -126,7 +126,7 @@ for k, (label, F, lab) in enumerate(panels):
     im = ax.imshow(F[pk], origin='upper', cmap=cmap, vmin=0, vmax=vmax, interpolation='bilinear',
                    extent=[GLOBAL_LONS[0], GLOBAL_LONS[-1], GLOBAL_LATS[-1], GLOBAL_LATS[0]],
                    aspect='auto')
-    ax.set_title('%s  (peak-window mean %.2f mm/3h)' % (label, float(F[pk].mean())))
+    ax.set_title('%s\nmean %.2f mm/3h' % (label, float(F[pk].mean())), fontsize=7.5)
     # 面板编号贴对应小图正下方：第一行（无 x 标签）编号紧贴图底，第二行在 x 标签之下；hspace 已加大避免编号落入下排标题区
     y_off = -0.24 if k // 3 == 0 else -0.30
     ax.text(0.5, y_off, lab, transform=ax.transAxes, fontsize=11, fontweight='bold',

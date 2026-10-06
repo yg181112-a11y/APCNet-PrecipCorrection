@@ -41,6 +41,7 @@ The manuscript re-frames the original "better network" story as an evidence-base
 ### 06 — Controlled experiments
 - `controlled_experiment.py` / `controlled_exp_grid.py` isolate the effect of each architectural/loss component (kinematics pooling, gating, hard-threshold loss) with matched seeds.
 - `controlled_experiment_mseonly.py` + `run_mseonly_all.py` — **pure-MSE attribution experiment** (identity / σ = 0.5 / 1.16 / 2.0 mm·3h⁻¹ × seeds 42/40/41). Under target noise, the full asymmetric multi-term loss degrades skill by −28.5% at the observed residual level, whereas the same architecture with a pure MSE loss degrades by only ≈ −1% — isolating the **loss design** as the dominant driver of the reported negative skill, not the target noise alone.
+- `train_24h_mseonly.py` + `mseonly_24h_results.json` — **24-h pure-MSE single-seed recheck**. With the composite loss replaced by plain MSE (everything else unchanged), the 24-h APCNet correction reaches **+26.9% MSE improvement** (12.80 vs raw GFS 17.52, CC 0.828) against +20.4% under the composite loss, confirming that the positive 24–120-h skill is **not** an artifact of the composite loss.
 ---
 ## Data sources
 | Data | Source | Period | Role |
