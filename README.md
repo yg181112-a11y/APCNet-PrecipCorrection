@@ -1,6 +1,6 @@
 # APCNet Precipitation Correction — Reanalysis-Trained DL Post-Processing over Northeast China
 **Code & data pipeline for the manuscript:**
-> *Skill limits and transferability of deep-learning precipitation post-processing trained on reanalysis targets: consistent failure across ERA5, CHM, and GPM verification over Northeast China*
+> *Skill limits and transferability of deep-learning precipitation post-processing trained on reanalysis targets: scale-dependent skill across ERA5, CHM, and GPM verification over Northeast China*
 > (Revision 3, submitted to *Weather and Forecasting*, AMS)
 ---
 ## Overview
@@ -24,7 +24,7 @@ The manuscript re-frames the original "better network" story as an evidence-base
 - `aggregate_era5_tp.py` — reconstructs true 3-h accumulations as `TP_3h(t) = tp(t−2h) + tp(t−1h) + tp(t)` for t ∈ {03, 09, 15, 21}Z, replacing the old monthly (3-hourly-subsampled) files.
 - `verify_era5_target.py` — six-gate acceptance (metadata; grid; GFS/ERA5 domain-mean ratio 0.9–1.1; annual precipitation 600–900 mm; ≥20 mm grid-point parity; time-series correlation r > 0.8). **Training is only permitted after all six gates pass.**
 ### 02 — Training & inference
-- `13.0_main.py` — main APCNet/U-Net training & evaluation script (seeds 42/40/41; input: 8 channels + 6 prior times at 6-h intervals; residual learning; asymmetric intensity-weighted loss and symmetric variant; model selection on validation composite score and POD20 with 8-epoch patience).
+- `13.0_main.py` — main APCNet/U-Net training & evaluation script (seeds 42/40/41; input: 8 channels + 6 prior times at 6-h intervals; residual learning; asymmetric intensity-weighted loss and symmetric variant; model selection on the validation composite score S = 3.0·ETS20 + 1.8·POD20 − 0.45·FAR20 + 1.4·ETS15 + 0.9·POD15 − 0.20·FAR15 − 0.003·L_val − 2.0·max(0, 0.20 − POD20), with early stopping when S has not improved for eight epochs or POD20 for sixteen).
 - Multi-lead training (`train_24h.py`, `train_24h_seed.py`, `train_unet_lead.py`, …) and GPM-target training (`gpm_train_dataset.py`, `train_gpm3h_apcnet.py`, `train_gpm_unet.py`, `eval_gpm_trained.py`).
 ### 03 — Baselines
 - `qm_baseline.py` — quantile mapping (climatological CDF, training-period calibration, test-period blind application).
@@ -37,7 +37,7 @@ The manuscript re-frames the original "better network" story as an evidence-base
 - Event-level / object-based / synoptic diagnostics: `event_verify_gpm3h.py`, `object_based_verification.py`, `storm_synoptic*.py`, `extreme_events.py`.
 - Diurnal (`season_3h_24h.py`, `chm_seasonal_run13.py`), terrain-stratified (`terra_phys_eval.py`), probabilistic (`gpm_prob_eval.py`), scale attribution (`scale_attribution.py`).
 ### 05 — Figures
-`make_figs_pub.py` orchestrates all journal figures (Times New Roman, panel labels, 300 dpi PNG + PDF).
+`make_figs_pub.py` and the `draw_*_run13.py` scripts orchestrate all journal figures (Times New Roman, panel labels, 300 dpi PNG + PDF). The final publication versions of all 14 figures (PNG + PDF, 300 dpi) are in `figures_300dpi/`.
 ### 06 — Controlled experiments
 - `controlled_experiment.py` / `controlled_exp_grid.py` isolate the effect of each architectural/loss component (kinematics pooling, gating, hard-threshold loss) with matched seeds.
 - `controlled_experiment_mseonly.py` + `run_mseonly_all.py` — **pure-MSE attribution experiment** (identity / σ = 0.5 / 1.16 / 2.0 mm·3h⁻¹ × seeds 42/40/41). Under target noise, the full asymmetric multi-term loss degrades skill by −28.5% at the observed residual level, whereas the same architecture with a pure MSE loss degrades by only ≈ −1% — isolating the **loss design** as the dominant driver of the reported negative skill, not the target noise alone.
