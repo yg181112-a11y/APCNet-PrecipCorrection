@@ -12,7 +12,7 @@ plt.rcParams.update({
 })
 import numpy as np
 
-FIG = r'C:\Users\yg181\Desktop\论文三\WAF\r3_media'
+FIG = r'D:\liaohe\论文三\WAF\r3_media'
 os.makedirs(FIG, exist_ok=True)
 
 # Okabe-Ito 色
@@ -45,42 +45,16 @@ for i, ref in enumerate(refs):
         ax.text(x6[j] + (i - 1) * w, v + dy, '%.1f' % v, ha='center', fontsize=7)
 ax.axhline(0, color='k', lw=0.8, ls='--')
 ax.set_xticks(x6); ax.set_xticklabels(methods, fontsize=9)
-ax.set_ylabel('MSE/RMSE improvement vs GFS (%)', fontsize=9)
-ax.set_ylim(-62, 33)
-ax.set_title('Consistent ranking: BinCM > OLS > QM > GFS > APCNet (3-h scales)', fontsize=9.5)
+ax.set_ylabel('RMSE improvement vs GFS (%)', fontsize=9)
+ax.set_ylim(-70, 33)
+ax.set_title('Consistent ranking across three references: BinCM > OLS > QM > APCNet > U-Net (GFS = 0 baseline)', fontsize=9)
 ax.legend(frameon=False, loc='upper right', fontsize=6.8, ncol=1)
 for s in ('top', 'right'):
     ax.spines[s].set_visible(False)
 plt.tight_layout()
-out = os.path.join(FIG, 'fig7_ranking_run13.png')
+out = r'D:\liaohe\论文三\04_定稿投稿代_2026_R3投稿包与归档\投稿系统上传\figures_300dpi\Fig08.png'
 plt.savefig(out, dpi=300, bbox_inches='tight')
 print('saved', out)
 
-# ===== 替换 docx 中的旧图（P87 段落） =====
-import docx
-from docx.oxml.ns import qn
-PATH = r'C:\Users\yg181\Desktop\论文三\Manuscript_R3_WAF_draft.docx'
-d = docx.Document(PATH)
-# 找到嵌入的 ranking 图（P87：图注 Fig.7 前一段含图且尺寸约 1727x956）
-target_idx = None
-for i, p in enumerate(d.paragraphs):
-    blips = p._p.findall('.//' + qn('a:blip'))
-    if not blips:
-        continue
-    # 检查下一段的 caption
-    nxt = d.paragraphs[i+1].text if i+1 < len(d.paragraphs) else ''
-    if 'Fig. 7' in nxt:
-        target_idx = i
-        break
-print('target para idx:', target_idx)
-if target_idx is not None:
-    p = d.paragraphs[target_idx]
-    blip = p._p.find('.//' + qn('a:blip'))
-    old_rid = blip.get(qn('r:embed'))
-    # 新图加入
-    new_rid, _ = d.part.get_or_add_image(out)
-    blip.set(qn('r:embed'), new_rid)
-    d.save(PATH)
-    print('replaced rId %s -> %s' % (old_rid, new_rid))
-else:
-    print('ERROR: Fig.7 paragraph not found')
+# ===== docx 回填由统一脚本处理（本脚本只渲染，不再直接改旧手稿） =====
+print('render only; docx replacement handled centrally')

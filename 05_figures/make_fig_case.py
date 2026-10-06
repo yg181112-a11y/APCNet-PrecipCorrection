@@ -17,7 +17,7 @@ from matplotlib import cm
 WORK = r"D:\liaohe\校正优化过程\第三阶段\12优化\manuscript_work"
 GPM_ROOT = r"D:\liaohe\GPM_IMERG"
 APC42 = os.path.join(WORK, 'predictions_apcnet.npy')           # run13 S42
-OUT = r"C:\Users\yg181\Desktop\论文三\WAF\r3_media"
+OUT = r"D:\liaohe\论文三\WAF\r3_media"
 GLOBAL_LATS = np.linspace(46.0, 40.0, 25)
 GLOBAL_LONS = np.linspace(117.0, 126.0, 37)
 WINDOW_END_HOURS = [3, 9, 15, 21]
@@ -117,7 +117,7 @@ vmax = 15.0
 cmap = matplotlib.colormaps['viridis']
 
 fig = plt.figure(figsize=(7.0, 6.6))
-gs = fig.add_gridspec(2, 3, height_ratios=[1.0, 1.0], hspace=0.38, wspace=0.13,
+gs = fig.add_gridspec(2, 3, height_ratios=[1.0, 1.0], hspace=0.58, wspace=0.13,
                       left=0.06, right=0.97, top=0.74, bottom=0.22)
 panels = [("GPM IMERG (obs)", OBS, "(a)"), ("GFS (raw)", G, "(b)"), ("QM", Q, "(c)"),
           ("OLS", O, "(d)"), ("APCNet", A, "(e)"), ("U-Net", U, "(f)")]
@@ -126,8 +126,9 @@ for k, (label, F, lab) in enumerate(panels):
     im = ax.imshow(F[pk], origin='upper', cmap=cmap, vmin=0, vmax=vmax, interpolation='bilinear',
                    extent=[GLOBAL_LONS[0], GLOBAL_LONS[-1], GLOBAL_LATS[-1], GLOBAL_LATS[0]],
                    aspect='auto')
-    ax.set_title('%s  (%.2f)' % (label, float(F[pk].mean())))
-    y_off = -0.16 if k // 3 == 0 else -0.30   # 第一行无 x 轴标签，编号贴图下方；第二行在 x 标签之下
+    ax.set_title('%s  (peak-window mean %.2f mm/3h)' % (label, float(F[pk].mean())))
+    # 面板编号贴对应小图正下方：第一行（无 x 标签）编号紧贴图底，第二行在 x 标签之下；hspace 已加大避免编号落入下排标题区
+    y_off = -0.24 if k // 3 == 0 else -0.30
     ax.text(0.5, y_off, lab, transform=ax.transAxes, fontsize=11, fontweight='bold',
             va='top', ha='center')
     ax.set_xticks([118, 121, 124])
@@ -145,17 +146,17 @@ for k, (label, F, lab) in enumerate(panels):
 
 cb_ax = fig.add_axes([0.30, 0.115, 0.40, 0.018])
 cb = fig.colorbar(im, cax=cb_ax, orientation='horizontal')
-cb.set_label('mm / 3 h')
+cb.set_label('mm/3h')
 cb.ax.tick_params(labelsize=6.5)
 
 # ---- time series above panels ----
 ax2 = fig.add_axes([0.06, 0.815, 0.91, 0.115])
 r0, r1 = max(0, pk - 5), min(n, pk + 6)
 tt = np.arange(r0, r1)
-for lab, F, c, ls in [('obs', OBS, OKABE[0], '-'), ('GFS', G, OKABE[1], '--'),
-                      ('QM', Q, OKABE[2], '-.'), ('OLS', O, OKABE[3], ':'),
-                      ('APCNet', A, OKABE[4], '-'), ('U-Net', U, OKABE[5], ':')]:
-    ax2.plot(tt, F[tt].mean(axis=(1, 2)), color=c, ls=ls, lw=1.3, marker='o', ms=2.8,
+for lab, F, c, ls, mk in [('GPM (obs)', OBS, '#000000', '-', 'o'), ('GFS', G, '#333333', '--', 's'),
+                          ('QM', Q, '#E69F00', '-.', '^'), ('OLS', O, '#0072B2', ':', 'D'),
+                          ('APCNet', A, '#D55E00', '-', 'P'), ('U-Net', U, '#CC79A7', ':', 'v')]:
+    ax2.plot(tt, F[tt].mean(axis=(1, 2)), color=c, ls=ls, lw=1.3, marker=mk, ms=3.2,
              label=lab)
 ax2.axvline(pk, color='0.4', lw=0.8, ls=':')
 ax2.set_xticks(tt[::2])
@@ -172,9 +173,8 @@ fig.suptitle('Typical Northeast China cold-vortex heavy-rain event: %s  (peak wi
 
 import os as _os
 _os.makedirs(OUT, exist_ok=True)
-png = _os.path.join(OUT, 'fig10_case_run13.png')
-pdf = _os.path.join(OUT, 'fig10_case_run13.pdf')
+png = r'D:\liaohe\论文三\04_定稿投稿代_2026_R3投稿包与归档\投稿系统上传\figures_300dpi\Fig09.png'
+pdf = r'D:\liaohe\论文三\04_定稿投稿代_2026_R3投稿包与归档\投稿系统上传\figures_300dpi\Fig09.pdf'
 fig.savefig(png, dpi=300, facecolor='white')
 fig.savefig(pdf, facecolor='white')
 print('saved', png)
-print('saved', pdf)

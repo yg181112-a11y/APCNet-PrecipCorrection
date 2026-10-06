@@ -43,8 +43,8 @@ print(json.dumps(data, indent=1))
 with open(os.path.join(WORK, 'diurnal_run13.json'), 'w', encoding='utf-8') as f:
     json.dump(data, f, indent=1)
 
-colors = {'GPM IMERG (obs)': 'k', 'GFS': '#56B4E9', 'QM': '#009E73', 'OLS': '#E69F00', 'APCNet': '#D55E00', 'U-Net': '#CC79A7'}
-styles = {'GPM IMERG (obs)': '-o', 'GFS': '--s', 'QM': '--^', 'OLS': '--D', 'APCNet': '-o', 'U-Net': '--v'}
+colors = {'GPM IMERG (obs)': 'k', 'GFS': '#333333', 'QM': '#E69F00', 'OLS': '#0072B2', 'APCNet': '#D55E00', 'U-Net': '#CC79A7'}
+styles = {'GPM IMERG (obs)': '-o', 'GFS': '--s', 'QM': '--^', 'OLS': '--D', 'APCNet': '-s', 'U-Net': '--v'}
 fig, ax = plt.subplots(figsize=(7.2, 4.6))
 x = list(range(4))
 for name, y in data.items():
@@ -57,8 +57,9 @@ ax.set_ylabel('Domain-mean precipitation rate (mm/3h)', fontsize=11)
 ax.set_title('Diurnal cycle over the GPM-verification samples (2024-2025)', fontsize=12)
 ax.legend(frameon=False, fontsize=9, loc='upper left')
 ax.set_ylim(0, 0.72)
+ax.text(2.30, 0.665, 'DL networks overestimate by ~2x vs GPM', fontsize=8.5, color='0.35', ha='left')
 ax.grid(alpha=0.25)
 fig.tight_layout()
-out = r'C:\Users\yg181\Desktop\论文三\WAF\r3_media\fig_diurnal_run13.png'
+out = r'D:\liaohe\论文三\04_定稿投稿代_2026_R3投稿包与归档\投稿系统上传\figures_300dpi\Fig11.png'
 fig.savefig(out, dpi=300, bbox_inches='tight')
 print('saved', out)

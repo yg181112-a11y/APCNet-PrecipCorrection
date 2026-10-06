@@ -93,11 +93,12 @@ arrow(11.55, 6.8, 11.90, 6.8)                   # Bottleneck -> Upsample
 arrow(12.85, 6.8, 13.25, 6.75)                  # Upsample -> Dec-1
 arrow(14.22, 6.1, 14.22, 5.70)                  # Dec-1 -> SA (tip at SA top edge)
 
-# skip connection (e1 -> Dec-1), tips at box edges
-arrow(5.10, 6.3, 5.10, 3.7, color=C_SKIP, lw=1.4)
-arrow(5.10, 3.7, 14.22, 3.7, color=C_SKIP, lw=1.4)
-arrow(14.22, 3.7, 14.22, 6.1, color=C_SKIP, lw=1.4)
-ax.text(7.6, 3.85, 'skip connection (e1: 48ch)', fontsize=13, color=C_SKIP, style='italic')
+# skip connection (e1 -> Dec-1): 曲线箭头从 Enc-1 底部绕到 Dec-1 底部左缘，
+# 弧深控制在 heads 顶(3.7)之上，避免压线/进入任何框（v4 F12: e1 路径此前终止于 Storm 框顶）
+a = FancyArrowPatch((5.95, 6.3), (13.45, 6.1), arrowstyle='-|>', color=C_SKIP, lw=1.4,
+                    connectionstyle='arc3,rad=-0.55', mutation_scale=18)
+ax.add_patch(a)
+ax.text(9.7, 5.02, 'e1 skip (48ch) \u2192 Dec-1 concat', fontsize=13, color=C_SKIP, style='italic')
 
 # ============ Thermodynamic branch (lower) ============
 box(2.35, 2.1, 1.55, 1.0, 'Last step\n7ch thermo\n(CAPE, PWAT,\nU, V, VVEL\u2026)', C_THERM, 12.5)  # right 3.90

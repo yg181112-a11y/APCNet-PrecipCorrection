@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """R3 稿 Fig.2-8 期刊风格统一重绘（scientific-visualization 规范）。
 输出: D:\\liaohe\\校正优化过程\\第三阶段\\12优化\\fig_p3_pub\\  (*.png 300dpi + *.pdf 矢量)
 规范: Arial / Okabe-Ito 色盲安全 / despine / 面板标签 bold / 冗余线型编码
@@ -212,7 +212,7 @@ ax.set_ylim(-45, 10)
 ax.set_xticks(sigmas)
 panel_label(ax, '(b)')
 despine(ax)
-fig.suptitle('Negative skill is a property of the noisy target, not of the architecture', fontsize=10, y=0.99)
+fig.suptitle('Controlled experiment: target noise drives degradation, and the composite loss sets its magnitude', fontsize=10, y=0.99)
 save(fig, 'fig4_snr')
 
 # ================= Fig.5: CHM 验证 =================
@@ -351,3 +351,4 @@ despine(ax)
 save(fig, 'fig8_diurnal')
 
 print('\n全部完成')
+

@@ -17,7 +17,7 @@ plt.rcParams.update({
 from matplotlib.colors import TwoSlopeNorm
 
 WORK = r'D:\liaohe\校正优化过程\第三阶段\12优化\manuscript_work'
-MEDIA = r'C:\Users\yg181\Desktop\论文三\WAF\r3_media'
+MEDIA = r'D:\liaohe\论文三\WAF\r3_media'
 GLOBAL_LATS = np.linspace(46.0, 40.0, 25)
 GLOBAL_LONS = np.linspace(117.0, 126.0, 37)
 
@@ -64,23 +64,23 @@ for ax, d, t, xl, lab in pans:
 ax = axes[1, 1]
 xg = bg[mask]
 ya = ba[mask]
-ax.scatter(xg, ya, s=14, c='#0072B2', alpha=0.65, edgecolors='none')
+ax.scatter(xg, ya, s=14, c='#8C8C8C', alpha=0.65, edgecolors='none')
 lim = max(np.nanmax(np.abs(xg)), np.nanmax(np.abs(ya)))
 ax.plot([-lim, lim], [-lim, lim], 'k--', lw=1.2, label='1:1 (unchanged structure)')
 ok = np.isfinite(xg) & np.isfinite(ya)
 b, a = np.polyfit(xg[ok], ya[ok], 1)
 xs = np.linspace(-lim, lim, 50)
-ax.plot(xs, a + b * xs, color='#D55E00', lw=1.6, label=f'OLS fit (slope {b:.2f})')
+ax.plot(xs, a + b * xs, color='#0072B2', lw=1.6, label=f'OLS fit (slope {b:.2f})')
 ax.axhline(0, color='0.7', lw=0.7)
 ax.axvline(0, color='0.7', lw=0.7)
-ax.text(0.04, 0.93, f'N = {int(ok.sum())} grid points\n'
+ax.text(0.03, 0.03, f'N = {int(ok.sum())} grid points\n'
         f'GFS bias {np.nanmean(xg):+.3f} / APC bias {np.nanmean(ya):+.3f} mm/3h\n'
         f'corr = {np.corrcoef(xg[ok], ya[ok])[0,1]:.2f}',
-        transform=ax.transAxes, fontsize=9, va='top',
+        transform=ax.transAxes, fontsize=9, va='bottom', ha='left',
         bbox=dict(fc='white', ec='0.6', alpha=0.85))
 ax.set_xlabel(r'GFS $-$ ERA5 mean bias (mm/3h)', fontsize=10)
 ax.set_ylabel(r'APCNet $-$ ERA5 mean bias (mm/3h)', fontsize=10)
-ax.legend(frameon=False, fontsize=9, loc='upper right')
+ax.legend(frameon=True, facecolor='white', edgecolor='0.6', fontsize=9, loc='upper right')
 ax.set_title('Grid-point bias relation', fontsize=12)
 ax.set_xlim(-lim, lim)
 ax.set_ylim(-lim, lim)
@@ -94,7 +94,7 @@ cbar.set_label('Mean bias vs ERA5 target (mm/3h), test period 2024-2025', fontsi
 cbar.ax.tick_params(labelsize=8.5)
 fig.suptitle('What the DL correction actually changes: mean-bias fields and their grid-point relationship',
              fontsize=13, y=0.985)
-out = os.path.join(MEDIA, 'fig_bias_contrast_run13.png')
+out = r'D:\liaohe\论文三\04_定稿投稿代_2026_R3投稿包与归档\投稿系统上传\figures_300dpi\Fig05.png'
 fig.savefig(out, dpi=300, bbox_inches='tight')
 print('saved', out)
 print('RATIO', 12.5 / 9.8)

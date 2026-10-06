@@ -15,8 +15,8 @@ plt.rcParams.update({
 })
 
 WORK = r'D:\liaohe\校正优化过程\第三阶段\12优化\manuscript_work'
-RUN13 = r'C:\Users\yg181\Desktop\论文三\13.0修复重跑'
-MEDIA = r'C:\Users\yg181\Desktop\论文三\WAF\r3_media'
+RUN13 = r'D:\liaohe\论文三\03_重建成稿代_2026_R3全链主实验'
+MEDIA = r'D:\liaohe\论文三\WAF\r3_media'
 GLOBAL_LATS = np.linspace(46.0, 40.0, 25)
 GLOBAL_LONS = np.linspace(117.0, 126.0, 37)
 OKABE = ['#E69F00','#56B4E9','#009E73','#F0E442','#0072B2','#D55E00','#CC79A7','#000000']
@@ -37,25 +37,37 @@ print(f'QM  bias {bq.mean():+.3f} std {np.nanstd(bq[mask]):.3f}')
 print(f'APC bias {ba.mean():+.3f} std {np.nanstd(ba[mask]):.3f} local max {np.nanmax(ba[mask]):+.2f}')
 
 vmax = float(np.ceil(max(np.nanmax(np.abs(bg[mask])), np.nanmax(np.abs(bq[mask])), np.nanmax(np.abs(ba[mask]))) * 10) / 10)
-fig, axes = plt.subplots(1, 3, figsize=(15, 4.8), gridspec_kw={'wspace': 0.10})
+fig, axes = plt.subplots(1, 3, figsize=(17.2, 4.8), gridspec_kw={'wspace': 0.30})
 titles = [r'GFS $-$ ERA5', r'QM $-$ ERA5', r'APCNet $-$ ERA5']
 datas = [bg, bq, ba]
 norm = TwoSlopeNorm(vmin=-vmax, vcenter=0.0, vmax=vmax)
+cmap4 = plt.cm.RdBu_r.copy()
+cmap4.set_over('#7a0000')   # 超出色标上限的格点以深红标识（v4 F9: 面板(c) 无截断提示）
+ims = []
 for ax, d, t in zip(axes, datas, titles):
     d2 = np.where(mask, d, np.nan)
-    im = ax.pcolormesh(GLOBAL_LONS, GLOBAL_LATS, d2, cmap='RdBu_r', norm=norm, shading='auto')
+    im = ax.pcolormesh(GLOBAL_LONS, GLOBAL_LATS, d2, cmap=cmap4, norm=norm, shading='auto')
+    ims.append(im)
     ax.set_title(t, fontsize=12)
     ax.set_xlabel('Longitude (°E)', fontsize=11)
-    ax.set_ylabel('Latitude (°N)', fontsize=11)
+    if ax is axes[0]:
+        ax.set_ylabel('Latitude (°N)', fontsize=11)
+    else:
+        ax.set_yticklabels([])   # 仅最左面板显示纬度标签，避免三个面板重复旋转标签挤占间距
     ax.set_aspect(1.6)
 for ax, lab in zip(axes, ['(a)', '(b)', '(c)']):
     ax.text(0.5, -0.20, lab, transform=ax.transAxes, fontsize=13, fontweight='bold',
             va='top', ha='center')
-cbar = fig.colorbar(im, ax=axes, fraction=0.03, pad=0.04, shrink=0.85)
-cbar.set_label('Mean bias vs ERA5 target (mm/3h), test period 2024-2025', fontsize=11)
+# 每个面板就近放置独立色标（同 norm/cmap），消除"色标在极右、距 (a)(b) 过远"的问题；extend 箭头仅在数据超界时显示
+cbs = []
+for axx, imm in zip(axes, ims):
+    cb = fig.colorbar(imm, ax=axx, fraction=0.046, pad=0.03, extend='max')
+    cb.ax.tick_params(labelsize=9)
+    cbs.append(cb)
+cbs[-1].set_label('Mean bias vs ERA5 target (mm/3h), test period 2024-2025', fontsize=11)
 fig.suptitle('Spatial structure of the corrections on the training reference', fontsize=14, y=1.02)
 fig.tight_layout(rect=[0, 0, 0.985, 1])
-fig4 = os.path.join(MEDIA, 'fig_bias_maps_run13.png')
+fig4 = r'D:\liaohe\论文三\04_定稿投稿代_2026_R3投稿包与归档\投稿系统上传\figures_300dpi\Fig04.png'
 fig.savefig(fig4, dpi=300, bbox_inches='tight')
 print('saved', fig4)
 
@@ -92,16 +104,22 @@ yerr = [[o - lo, hi - o] for o, (lo, hi) in zip(obs, ci)]
 bars = ax.bar(methods, obs, yerr=np.array(yerr).T, capsize=4, color=[OKABE[5], OKABE[2], OKABE[4]], alpha=0.9, width=0.5)
 ax.axhline(0, color='k', lw=0.8)
 for i, (o, (lo, hi)) in enumerate(zip(obs, ci)):
-    ax.text(i, hi + 1.5, f'{o:+.1f}%', ha='center', fontsize=10, fontweight='bold')
-    ax.text(i, lo - 3.5, f'[{lo:+.1f}, {hi:+.1f}]', ha='center', fontsize=7.5, color='0.35')
+    if o >= 0:
+        # 正值柱：点估计在柱顶上方，CI 括号在点估计上方（避免压柱体）
+        ax.text(i, hi + 1.2, f'{o:+.1f}%', ha='center', fontsize=10, fontweight='bold')
+        ax.text(i, hi + 4.6, f'[{lo:+.1f}, {hi:+.1f}]', ha='center', fontsize=7.5, color='0.35')
+    else:
+        # 负值柱：点估计在 0 线附近柱顶上方，CI 括号在柱底下方
+        ax.text(i, hi + 1.2, f'{o:+.1f}%', ha='center', fontsize=10, fontweight='bold')
+        ax.text(i, lo - 3.5, f'[{lo:+.1f}, {hi:+.1f}]', ha='center', fontsize=7.5, color='0.35')
 ax.set_ylabel('RMSE improvement vs GFS (%)')
 ax.set_title('Monthly block bootstrap, 95% CI', fontsize=11)
 ax.text(0.5, -0.15, '(b)', transform=ax.transAxes, fontsize=13, fontweight='bold', va='top', ha='center')
-ax.set_ylim(-40, 30)
+ax.set_ylim(-40, 32)
 ax.grid(axis='y', alpha=0.3)
 fig.tight_layout()
-fig6 = os.path.join(MEDIA, 'fig_chm_run13.png')
-fig.savefig(fig6, dpi=300, bbox_inches='tight')
-print('saved', fig6)
+fig7 = r'D:\liaohe\论文三\04_定稿投稿代_2026_R3投稿包与归档\投稿系统上传\figures_300dpi\Fig07.png'
+fig.savefig(fig7, dpi=300, bbox_inches='tight')
+print('saved', fig7)
 print('FIG4_RATIO', 15 / 4.6)
 print('FIG6_RATIO', 12.0 / 5.95)

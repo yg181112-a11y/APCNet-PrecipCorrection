@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-OUTD = r'C:\Users\yg181\Desktop\论文三\WAF\r3_media'
+OUTD = r'D:\liaohe\论文三\03_重建成稿代_2026_R3全链主实验\r3_media\r3_media'
 os.makedirs(OUTD, exist_ok=True)
 
 plt.rcParams.update({
@@ -20,7 +20,9 @@ plt.rcParams.update({
     'xtick.labelsize': 7.5, 'ytick.labelsize': 7.5, 'legend.fontsize': 7.5,
     'axes.spines.top': False, 'axes.spines.right': False,
 })
-OKABE = ['#E69F00', '#56B4E9', '#009E73', '#F0E442', '#0072B2', '#D55E00', '#CC79A7', '#000000']
+# 全稿统一"方法—颜色"映射（v4 N3：跨图同方法必须同色）
+C_APC = '#D55E00'; C_UNET = '#CC79A7'; C_QM = '#E69F00'; C_OLS = '#0072B2'; C_BIN = '#009E73'
+C_GFS = '#000000'
 
 # 数据（% vs GFS；本脚本统一为正=改进，故取反 MSE 改进符号以与正文一致）
 scales = ['3h', '24h', '72h', '120h']
@@ -75,39 +77,39 @@ fig, axes = plt.subplots(1, 3, figsize=(9.6, 2.9), gridspec_kw={'wspace': 0.45})
 # Panel A
 ax = axes[0]
 ax.axhline(0, color='0.55', lw=0.8, zorder=1)
-ax.plot(xs, apc, 'o-', color=OKABE[4], lw=1.6, ms=4.5, label='APCNet', zorder=3)
-ax.plot(xs, unet, 's-', color=OKABE[7], lw=1.6, ms=4.5, label='U-Net', zorder=3)
-ax.plot(xs, qm, '^-', color=OKABE[0], lw=1.6, ms=4.5, label='QM', zorder=3)
-ax.plot(xs, bm, 'v-', color=OKABE[1], lw=1.4, ms=4, label='BinCM', zorder=2)
-ax.plot(xs, ols, 'd-', color=OKABE[5], lw=1.4, ms=4, label='OLS', zorder=2)
+ax.plot(xs, apc, 'o-', color=C_APC, lw=1.6, ms=4.5, label='APCNet', zorder=3)
+ax.plot(xs, unet, 's-', color=C_UNET, lw=1.6, ms=4.5, label='U-Net', zorder=3)
+ax.plot(xs, qm, '^-', color=C_QM, lw=1.6, ms=4.5, label='QM', zorder=3)
+ax.plot(xs, bm, 'v-', color=C_BIN, lw=1.4, ms=4, label='BinCM', zorder=2)
+ax.plot(xs, ols, 'd-', color=C_OLS, lw=1.4, ms=4, label='OLS', zorder=2)
 ax.set_xticks(xs); ax.set_xticklabels(scales)
 ax.set_xlabel('Accumulation scale')
 ax.set_ylabel('MSE improvement vs GFS (%)')
 ax.set_title('Reanalysis (ERA5) reference')
 ax.text(0.5, -0.28, '(a)', transform=ax.transAxes, fontsize=12, fontweight='bold', va='top', ha='center')
-ax.legend(frameon=False, loc='lower right', ncol=1)
-ax.set_ylim(-25, 62)
-ax.annotate('positive = improvement', xy=(0.02, 0.92), xycoords='axes fraction', fontsize=7, color='0.35')
+ax.legend(frameon=False, loc='upper left', ncol=1)
+ax.set_ylim(-70, 62)
+ax.annotate('positive = improvement', xy=(0.02, 0.30), xycoords='axes fraction', fontsize=7, color='0.35')
 
 # Panel B
 ax = axes[1]
 ax.axhline(0, color='0.55', lw=0.8, zorder=1)
 x2 = np.arange(3)
 # CHM 实线，GPM 虚线；error bars = 月块 bootstrap 95% CI
-ax.plot(x2, chm_apc, 'o-', color=OKABE[4], lw=1.6, ms=4.5, label='APCNet (CHM)', zorder=3)
-ax.plot(x2, chm_unet, 's-', color=OKABE[7], lw=1.6, ms=4.5, label='U-Net (CHM)', zorder=3)
-ax.plot(x2, gpm_apc, 'o--', color=OKABE[4], lw=1.6, ms=4.5, label='APCNet (GPM)', zorder=3)
-ax.plot(x2, gpm_unet, 's--', color=OKABE[7], lw=1.6, ms=4.5, label='U-Net (GPM)', zorder=3)
-ax.errorbar(x2, chm_apc, yerr=chm_apc_err, fmt='none', ecolor=OKABE[4], elinewidth=1.0, capsize=2.5, zorder=2)
-ax.errorbar(x2, chm_unet, yerr=chm_unet_err, fmt='none', ecolor=OKABE[7], elinewidth=1.0, capsize=2.5, zorder=2)
-ax.errorbar(x2, gpm_apc, yerr=gpm_apc_err, fmt='none', ecolor=OKABE[4], elinewidth=1.0, capsize=2.5, zorder=2)
-ax.errorbar(x2, gpm_unet, yerr=gpm_unet_err, fmt='none', ecolor=OKABE[7], elinewidth=1.0, capsize=2.5, zorder=2)
+ax.plot(x2, chm_apc, 'o-', color=C_APC, lw=1.6, ms=4.5, label='APCNet (CHM)', zorder=3)
+ax.plot(x2, chm_unet, 's-', color=C_UNET, lw=1.6, ms=4.5, label='U-Net (CHM)', zorder=3)
+ax.plot(x2, gpm_apc, 'o--', color=C_APC, lw=1.6, ms=4.5, label='APCNet (GPM)', zorder=3)
+ax.plot(x2, gpm_unet, 's--', color=C_UNET, lw=1.6, ms=4.5, label='U-Net (GPM)', zorder=3)
+ax.errorbar(x2, chm_apc, yerr=chm_apc_err, fmt='none', ecolor=C_APC, elinewidth=1.0, capsize=2.5, zorder=2)
+ax.errorbar(x2, chm_unet, yerr=chm_unet_err, fmt='none', ecolor=C_UNET, elinewidth=1.0, capsize=2.5, zorder=2)
+ax.errorbar(x2, gpm_apc, yerr=gpm_apc_err, fmt='none', ecolor=C_APC, elinewidth=1.0, capsize=2.5, zorder=2)
+ax.errorbar(x2, gpm_unet, yerr=gpm_unet_err, fmt='none', ecolor=C_UNET, elinewidth=1.0, capsize=2.5, zorder=2)
 ax.set_xticks(x2); ax.set_xticklabels(['24h', '72h', '120h'])
 ax.set_xlabel('Accumulation scale')
 ax.set_ylabel('Skill improvement vs GFS (%)')
 ax.set_title('Independent observations (CHM & GPM)')
 ax.text(0.5, -0.28, '(b)', transform=ax.transAxes, fontsize=12, fontweight='bold', va='top', ha='center')
-ax.legend(frameon=False, loc='lower right', ncol=2, fontsize=6.5)
+ax.legend(frameon=False, loc='lower left', ncol=2, fontsize=6.5)
 ax.set_ylim(-2, 22)
 
 # Panel C
@@ -116,19 +118,24 @@ S_ = S
 cc_g = [S_['era5_24h']['gfs_cc'], S_['era5_72h']['gfs_cc'], S_['era5_120h']['gfs_cc']]
 cc_a = [S_['era5_24h']['apcnet_cc'], S_['era5_72h']['apcnet_cc'], S_['era5_120h']['apcnet_cc']]
 cc_u = [S_['era5_24h']['unet_cc'], S_['era5_72h']['unet_cc'], S_['era5_120h']['unet_cc']]
-ax.plot(x2, cc_g, 'o--', color='0.5', lw=1.2, ms=4, label='GFS', zorder=2)
-ax.plot(x2, cc_a, 'o-', color=OKABE[4], lw=1.6, ms=4.5, label='APCNet', zorder=3)
-ax.plot(x2, cc_u, 's-', color=OKABE[7], lw=1.6, ms=4.5, label='U-Net', zorder=3)
+ax.plot(x2, cc_g, 'o--', color='0.45', lw=1.2, ms=4, label='GFS', zorder=2)
+ax.plot(x2, cc_a, 'o-', color=C_APC, lw=1.6, ms=4.5, label='APCNet', zorder=3)
+ax.plot(x2, cc_u, 's-', color=C_UNET, lw=1.6, ms=4.5, label='U-Net', zorder=3)
 ax.set_xticks(x2); ax.set_xticklabels(['24h', '72h', '120h'])
 ax.set_xlabel('Accumulation scale')
 ax.set_ylabel('Spatial CC (vs ERA5)')
 ax.set_title('Correlation, ERA5 ref.')
 ax.text(0.5, -0.28, '(c)', transform=ax.transAxes, fontsize=12, fontweight='bold', va='top', ha='center')
-ax.legend(frameon=False, loc='lower right')
+# 三条曲线末端标注（无图例框，避免与 0.70-0.85 数据区重叠）
+for xv, yv, lab, col in [(x2[-1], cc_g[-1], 'GFS', '0.45'),
+                          (x2[-1], cc_a[-1], 'APCNet', C_APC),
+                          (x2[-1], cc_u[-1], 'U-Net', C_UNET)]:
+    ax.annotate(lab, xy=(xv, yv), xytext=(6, 0), textcoords='offset points',
+                fontsize=7, color=col, va='center', ha='left')
+ax.set_xlim(-0.35, 2.55)
 ax.set_ylim(0.7, 0.85)
 
-fig.savefig(os.path.join(OUTD, 'fig_multi_lead_overview.pdf'), bbox_inches='tight')
-fig.savefig(os.path.join(OUTD, 'fig_multi_lead_overview.png'), dpi=300, bbox_inches='tight')
-print('saved fig_multi_lead_overview.pdf/.png')
+fig.savefig(r'D:\liaohe\论文三\04_定稿投稿代_2026_R3投稿包与归档\投稿系统上传\figures_300dpi\Fig12.png', dpi=300, bbox_inches='tight')
+print('saved Fig12.png')
 print('bm =', bm)
 print('ols =', ols)

@@ -14,8 +14,8 @@ plt.rcParams.update({
     'mathtext.fontset': 'stix',
 })
 
-E = r'C:\Users\yg181\Desktop\论文三\13.0修复重跑\24h_exp'
-MEDIA = r'C:\Users\yg181\Desktop\论文三\WAF\r3_media'
+E = r'D:\liaohe\论文三\03_重建成稿代_2026_R3全链主实验\24h_exp'
+MEDIA = r'D:\liaohe\论文三\WAF\r3_media'
 os.makedirs(MEDIA, exist_ok=True)
 
 gpm = np.load(os.path.join(E, 'gpm24_accum_00z.npy'))
@@ -78,11 +78,12 @@ for k, a in methods.items():
 qs = np.linspace(0.001, 0.999, 200)
 obs_q = np.quantile(t, qs)
 fig, ax = plt.subplots(figsize=(5.2, 5.2))
-colors = {'GFS': '#555555', 'APCNet (ERA5 target)': '#E69F00',
-          'U-Net (ERA5 target)': '#0072B2', 'U-Net (GPM target)': '#009E73',
-          'QM': '#D55E00'}
+colors = {'GFS': '#333333', 'APCNet (ERA5 target)': '#D55E00',
+          'U-Net (ERA5 target)': '#CC79A7', 'U-Net (GPM target)': '#CC79A7',
+          'QM': '#E69F00'}
 for k, a in methods.items():
-    ax.plot(obs_q, np.quantile(a, qs), color=colors[k], lw=1.6, label=k)
+    ls = '--' if k == 'U-Net (GPM target)' else '-'
+    ax.plot(obs_q, np.quantile(a, qs), color=colors[k], lw=1.6, ls=ls, label=k)
 ax.plot(obs_q, obs_q, 'k--', lw=1.0, label='1:1')
 ax.set_xlabel('GPM observed 24-h accumulation (mm)')
 ax.set_ylabel('Predicted 24-h accumulation (mm)')
@@ -91,9 +92,8 @@ ax.set_xlim(0, 60); ax.set_ylim(0, 60)
 ax.legend(frameon=False, fontsize=8, loc='upper left')
 ax.grid(alpha=0.3)
 plt.tight_layout()
-fig.savefig(os.path.join(MEDIA, 'fig_qq_24h.pdf'))
-fig.savefig(os.path.join(MEDIA, 'fig_qq_24h.png'), dpi=300)
-print('\n✅ 已保存 fig_qq_24h.pdf/.png')
+fig.savefig(r'D:\liaohe\论文三\04_定稿投稿代_2026_R3投稿包与归档\投稿系统上传\figures_300dpi\Fig13.png', dpi=300)
+print('\n✅ 已保存 Fig13.png')
 
 # ---- 季节分解 ----
 months = [datetime_m for datetime_m in []]
