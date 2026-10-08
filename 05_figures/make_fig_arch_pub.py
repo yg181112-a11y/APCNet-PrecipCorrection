@@ -85,12 +85,12 @@ box(13.25, 6.1, 1.95, 1.15, 'Dec-1\nConcat(up+e1)\n=240\nConv 240\u219296\nConv 
 box(13.25, 4.75, 1.95, 0.95, 'Spatial\nAttention\nConv 96\u21921\n(7\u00d77)+Sigmoid', C_KIN, 12)       # right 15.20
 
 arrow(1.15, 5.2, 2.35, 6.825, style='ortho')     # Input top-mid -> TA left-mid
-arrow(3.90, 6.825, 4.25, 6.825)                  # TA -> Enc-1
-arrow(5.95, 6.825, 6.30, 6.8)                    # Enc-1 -> MaxPool
-arrow(7.25, 6.8, 7.65, 6.825)                    # MaxPool -> Enc-2
-arrow(9.45, 6.825, 9.90, 6.825)                  # Enc-2 -> Bottleneck
-arrow(11.55, 6.825, 11.90, 6.8)                  # Bottleneck -> Upsample
-arrow(12.85, 6.8, 13.25, 6.675)                  # Upsample -> Dec-1
+arrow(3.90, 6.825, 4.25, 6.825)                  # TA -> Enc-1 (both box midpoints y=6.825)
+arrow(5.95, 6.8125, 6.30, 6.8125)                # Enc-1 -> MaxPool (HORIZONTAL, mid of 6.825/6.8)
+arrow(7.25, 6.8125, 7.65, 6.8125)                # MaxPool -> Enc-2 (HORIZONTAL, mid of 6.8/6.825)
+arrow(9.45, 6.825, 9.90, 6.825)                  # Enc-2 -> Bottleneck (both midpoints y=6.825)
+arrow(11.55, 6.8125, 11.90, 6.8125)              # Bottleneck -> Upsample (HORIZONTAL, mid of 6.825/6.8)
+arrow(12.85, 6.7375, 13.25, 6.7375)              # Upsample -> Dec-1 (HORIZONTAL, mid of 6.8/6.675)
 arrow(14.22, 6.1, 14.22, 5.70)                   # Dec-1 -> SA (tip at SA top-edge midpoint)
 
 # skip connection (e1 -> Dec-1 concat): 正交折线（垂直-水平-垂直），
@@ -100,7 +100,7 @@ ax.plot([5.10, 5.10], [7.35, 7.75], color=C_SKIP, lw=1.5, solid_capstyle='round'
 ax.plot([5.10, 14.225], [7.75, 7.75], color=C_SKIP, lw=1.5, solid_capstyle='round')
 ax.plot([14.225, 14.225], [7.75, 7.25], color=C_SKIP, lw=1.5, solid_capstyle='round')
 ax.add_patch(FancyArrowPatch((14.225, 7.75), (14.225, 7.25), arrowstyle='-|>', color=C_SKIP, lw=1.5, mutation_scale=18))
-ax.text(9.68, 7.50, 'e1 skip (48ch) \u2192 Dec-1 concat', fontsize=13, color=C_SKIP, style='italic')
+ax.text(9.68, 7.45, 'e1 skip (48ch) \u2192 Dec-1 concat', fontsize=13, color=C_SKIP, style='italic')
 
 # ============ Thermodynamic branch (lower) ============
 box(2.35, 2.1, 1.55, 1.0, 'Last step\n7ch thermo\n(CAPE, PWAT,\nU, V, VVEL\u2026)', C_THERM, 12.5)  # right 3.90
@@ -108,15 +108,15 @@ box(4.25, 2.15, 1.95, 1.0, 'FiLM-1\nSE-Attn\nConv 7\u219296\u2192192\n\u03b3, \u
 box(6.55, 2.15, 1.95, 1.0, 'FiLM-2\nx\u00b7(1+tanh(\u03b3))\n+\u03b2', C_THERM, 13)  # right 8.50
 
 arrow(1.15, 4.1, 2.35, 2.6, style='ortho')       # Input bottom-mid -> Last step left-mid
-arrow(3.90, 2.6, 4.25, 2.65)                     # Last step -> FiLM-1
-arrow(6.20, 2.65, 6.55, 2.65)                    # FiLM-1 -> FiLM-2
+arrow(3.90, 2.625, 4.25, 2.625)                  # Last step -> FiLM-1 (HORIZONTAL, mid of 2.6/2.65)
+arrow(6.20, 2.65, 6.55, 2.65)                    # FiLM-1 -> FiLM-2 (both midpoints y=2.65)
 
 # FiLM-2 -> Spatial Attention modulation: 从 FiLM-2 上边框中点 (7.525, 3.15) 垂直向上至 y=5.225、
 # 水平右行、箭头终点 SA 左边框中点 (13.25, 5.225)
 ax.plot([7.525, 7.525], [3.15, 5.225], color=C_MOD, lw=1.6, solid_capstyle='round')
 ax.plot([7.525, 13.25], [5.225, 5.225], color=C_MOD, lw=1.6, solid_capstyle='round')
 ax.add_patch(FancyArrowPatch((12.95, 5.225), (13.25, 5.225), arrowstyle='-|>', color=C_MOD, lw=1.6, mutation_scale=16))
-ax.text(10.4, 4.95, 'thermodynamic modulation (\u03b3, \u03b2)', fontsize=13, color=C_MOD, style='italic')
+ax.text(10.4, 4.92, 'thermodynamic modulation (\u03b3, \u03b2)', fontsize=13, color=C_MOD, style='italic')
 
 # ============ Heads (unified boxes, well separated, gap 0.35) ============
 box(11.40, 3.0, 1.0, 0.7, 'Res Head\nConv 96\u21921\n(1\u00d71)\u00d710', C_HEAD, 10.5)   # right 12.40
@@ -141,7 +141,7 @@ arrow(14.60, 3.0, 14.05, 1.725, style='ortho')  # Storm bottom-mid -> Gated Fusi
 
 # GFS base
 box(9.55, 1.2, 1.55, 0.8, 'GFS base\n(Precip ch)', C_INPUT, 12.5)                       # right 11.10
-arrow(11.10, 1.6, 11.55, 1.725)                 # GFS base -> Gated Fusion
+arrow(11.10, 1.6625, 11.55, 1.6625)             # GFS base -> Gated Fusion (HORIZONTAL, mid of 1.6/1.725)
 
 # ============ Output ============
 box(11.90, 0.05, 1.85, 0.8, 'Corrected Precip\n(mm/3h, 25\u00d737)', C_OUT, 13, bold=True)  # top 0.85
