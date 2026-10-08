@@ -163,7 +163,7 @@ ax2.set_xticks(tt[::2])
 ax2.set_xticklabels([vt[j].strftime('%m-%d %HZ') for j in tt[::2]], fontsize=6.5)
 ax2.set_ylabel('Domain-mean\n(mm/3h)', fontsize=7)
 ax2.set_ylim(0, 8)
-ax2.legend(ncol=3, frameon=True, fontsize=6.5, loc='upper right', facecolor='white', framealpha=0.9, edgecolor='0.7')
+ax2.legend(ncol=3, frameon=True, fontsize=6.5, loc='upper left', facecolor='white', framealpha=0.95, edgecolor='0.7')
 ax2.text(0.01, 1.08, '3-h domain-mean precipitation around the peak window', transform=ax2.transAxes, fontsize=7.5, va='bottom', ha='left')
 for s in ax2.spines.values():
     s.set_linewidth(0.6)
