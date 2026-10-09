@@ -89,7 +89,7 @@ Raw data are too large to host here; scripts in `01_data_reconstruction` reprodu
 - Normalization statistics are estimated on the training period only; validation/test are never oversampled.
 - GFS precipitation input is clipped to [0,100] mm, capped at the 99.9th percentile, and lightly smoothed (σ=0.6) when the field maximum < 10 mm. **The ERA5 target is not cleaned.**
 - All significance tests use monthly **block bootstrap** (autocorrelation-aware); the 3-h test series are not treated as i.i.d.
-- The composite-loss checkpoint selection criterion used in the main experiment is disclosed verbatim in the manuscript (Section 2b); the M1 controls switch selection to validation-residual MSE, isolating the two interventions.
+- The composite-loss checkpoint selection criterion used in the main experiment is disclosed verbatim in the manuscript (Section 2a; the Data partitioning paragraph); the M1 controls switch selection to validation-residual MSE, isolating the two interventions.
 
 ---
 
